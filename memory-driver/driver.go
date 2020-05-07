@@ -4,6 +4,7 @@ type driver struct {
 	listQues    []*Question
 	listAnswers []*Answer
 	listUsers   []*User
+	userMapping map[string]*User
 }
 
 func GenerateDriver() *driver {
@@ -11,6 +12,7 @@ func GenerateDriver() *driver {
 		listQues:    []*Question{},
 		listAnswers: []*Answer{},
 		listUsers:   []*User{},
+		userMapping: make(map[string]*User),
 	}
 }
 
