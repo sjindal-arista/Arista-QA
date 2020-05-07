@@ -1,6 +1,6 @@
 package schema
 
-import driver "github.com/s-jindal/QA-Platform/memory-driver"
+import driver "github.com/sjindal-arista/Arista-QA/memory-driver"
 
 // Driver defines basic func for all storage
 type Driver interface {

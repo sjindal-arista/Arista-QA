@@ -3,7 +3,7 @@ package driver
 import (
 	"fmt"
 
-	"github.com/s-jindal/QA-Platform/utils"
+	"github.com/sjindal-arista/Arista-QA/utils"
 )
 
 type Answer struct {

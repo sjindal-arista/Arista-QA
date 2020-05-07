@@ -1,4 +1,4 @@
-module github.com/s-jindal/QA-Platform
+module github.com/sjindal-arista/Arista-QA
 
 go 1.13
 

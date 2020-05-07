@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	driver "github.com/s-jindal/QA-Platform/memory-driver"
-	"github.com/s-jindal/QA-Platform/schema"
+	driver "github.com/sjindal-arista/Arista-QA/memory-driver"
+	"github.com/sjindal-arista/Arista-QA/schema"
 )
 
 var handler schema.Driver
@@ -26,3 +26,22 @@ func main() {
 		fmt.Println(m)
 	}
 }
+
+// +build ignore
+
+// package main
+
+// import (
+// 	"fmt"
+// 	"log"
+// 	"net/http"
+// )
+
+// func handler(w http.ResponseWriter, r *http.Request) {
+// 	fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
+// }
+
+// func main() {
+// 	http.HandleFunc("/monkeys", handler)
+// 	log.Fatal(http.ListenAndServe(":8080", nil))
+// }
