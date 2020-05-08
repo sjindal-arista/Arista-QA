@@ -10,4 +10,5 @@ type Driver interface {
 	AddComment(ansID string, comStr string, u *driver.User) error
 	AddUser(handle, name, pass string) error
 	GetUser(key string) *driver.User
+	GetQuestion(qID string) *driver.Question
 }

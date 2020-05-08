@@ -32,6 +32,8 @@ func main() {
 
 func addUser(w http.ResponseWriter, r *http.Request) {
 	reqBody, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
 	if err != nil {
 		fmt.Fprintf(w, " 'Error': Error in decoding body: %v", err)
 	} else {
@@ -40,5 +42,17 @@ func addUser(w http.ResponseWriter, r *http.Request) {
 		if err := handler.AddUser(user.Handle, user.FullName, user.PassHash); err != nil {
 			fmt.Fprintf(w, " 'Error': could not add user %v", err)
 		}
+		fmt.Fprintf(w, "Success")
+	}
+}
+
+func fetchQues(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	qId := r.FormValue("qID")
+	if len(qId) == 0 {
+		fmt.Fprintf(w, "ques id not provided in the request")
+	} else {
+		ques := handler.GetQuestion(qId)
+		json.NewEncoder(w).Encode(ques)
 	}
 }
