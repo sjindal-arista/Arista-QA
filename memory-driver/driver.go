@@ -18,7 +18,7 @@ func GenerateDriver() *driver {
 
 func (d *driver) userExists(u *User) bool {
 	for _, user := range d.listUsers {
-		if user.handle == u.handle {
+		if user.Handle == u.Handle {
 			return true
 		}
 	}

@@ -41,3 +41,12 @@ func (d *driver) SearchQuestion(query string) []*Question {
 	}
 	return results
 }
+
+func (d *driver) GetQuestion(qID string) *Question {
+	for _, ques := range d.listQues {
+		if ques.quesID == qID {
+			return ques
+		}
+	}
+	return nil
+}
