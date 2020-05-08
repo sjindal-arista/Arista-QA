@@ -28,8 +28,8 @@ type Stats struct {
 
 // Comment -
 type Comment struct {
-	comment string
-	user    string
+	ComStr string `json: comment`
+	User   string `json: user`
 }
 
 // Driver defines basic func for all storage

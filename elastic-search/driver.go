@@ -2,6 +2,7 @@ package elasticsearch
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/aristanetworks/glog"
@@ -30,18 +31,14 @@ func GenerateDriver() *ElasticDriver {
 
 func initialise(eclient *Client) error {
 	ctx := context.Background()
-	glog.Infof("Creating index...")
-	err := eclient.CreateIndex(ctx, "user", nil, 400)
+	glog.Infof("Creating indices...")
+	data := map[string]interface{}{}
+	err := eclient.CreateIndex(ctx, "question", data, 400)
 	if err != nil {
 		glog.Errorf("Error in creating question index: %v", err)
 		return err
 	}
-	err = eclient.CreateIndex(ctx, "question", nil, 400)
-	if err != nil {
-		glog.Errorf("Error in creating question index: %v", err)
-		return err
-	}
-	err = eclient.CreateIndex(ctx, "answer", nil, 400)
+	err = eclient.CreateIndex(ctx, "answer", data, 400)
 	if err != nil {
 		glog.Errorf("Error in creating answer index: %v", err)
 		return err
@@ -50,19 +47,19 @@ func initialise(eclient *Client) error {
 }
 
 type questionDoc struct {
-	key  string
-	qusn string
-	user string
-	tags []string
+	Key  string   `json:"key"`
+	Qusn string   `json:"qusn"`
+	User string   `json:"user"`
+	Tags []string `json:"tags"`
 }
 
 type answerDoc struct {
-	key      string
-	qusnID   string
-	ans      string
-	user     string
-	stats    schema.Stats
-	comments []schema.Comment
+	Key      string           `json:"key"`
+	QusnID   string           `json:"qusn_id"`
+	Ans      string           `json:"ans"`
+	User     string           `json:"user"`
+	Stats    schema.Stats     `json:"stats"`
+	Comments []schema.Comment `json:"comments"`
 }
 
 // AddNewQuestion -
@@ -74,10 +71,10 @@ func (driver *ElasticDriver) AddNewQuestion(newQ, user string, tags []string) er
 			ID:    id,
 			Body: map[string]interface{}{
 				"data": questionDoc{
-					key:  id,
-					qusn: newQ,
-					user: user,
-					tags: tags,
+					Key:  id,
+					Qusn: newQ,
+					User: user,
+					Tags: tags,
 				},
 			},
 		},
@@ -107,11 +104,12 @@ func (driver *ElasticDriver) AnswerQuestion(qID, ans, user string) error {
 			ID:    id,
 			Body: map[string]interface{}{
 				"data": answerDoc{
-					key:      id,
-					qusnID:   qID,
-					user:     user,
-					stats:    schema.Stats{},
-					comments: []schema.Comment{},
+					Key:      id,
+					QusnID:   qID,
+					Ans:      ans,
+					User:     user,
+					Stats:    schema.Stats{},
+					Comments: []schema.Comment{},
 				},
 			},
 		},
@@ -129,5 +127,32 @@ func (driver *ElasticDriver) AnswerQuestion(qID, ans, user string) error {
 
 //AddComment -
 func (driver *ElasticDriver) AddComment(ansID, comStr, user string) error {
-	return fmt.Errorf("Not implememted")
+	data := map[string]interface{}{
+		"script": map[string]interface{}{
+			"source": "ctx._source.data.comments.add(params.comment)",
+			"params": map[string]interface{}{
+				"comment": map[string]string{
+					"comment": comStr,
+					"user":    user,
+				},
+			},
+		},
+	}
+	glog.Infof("Adding comment ...")
+	res, err := driver.UpdateDoc(context.Background(), "answer", ansID, data)
+	if err != nil {
+		glog.Errorf("Error in adding comment: %v", err)
+		return fmt.Errorf("Error in adding comment: %v", err)
+	}
+	var resp map[string]interface{}
+	err = json.Unmarshal(res, &resp)
+	if err != nil {
+		glog.Errorf("Error in unmarshaling updateDoc response: %v", err)
+	}
+	glog.Infof("Response is: %v", resp)
+	if err, ok := resp["error"]; ok {
+		return fmt.Errorf("Error in adding comment: %v", err)
+	}
+	glog.Infof("Comment added")
+	return nil
 }

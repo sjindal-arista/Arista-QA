@@ -1,8 +1,6 @@
 package elasticsearch
 
 import (
-	"context"
-	"encoding/json"
 	"flag"
 
 	"github.com/aristanetworks/glog"
@@ -14,53 +12,30 @@ type matchAll struct{}
 func Test() {
 	flag.Parse()
 
-	eclient := NewClient("http://localhost:9200")
+	eclient := GenerateDriver()
 
-	ctx := context.Background()
-
-	body := map[string]interface{}{
-		"first_field":  "testindexbody1",
-		"second_field": "testindexbody2",
-	}
-
-	glog.Infof("Creating index...")
-	err := eclient.CreateIndex(ctx, "personal_info", body, 400)
-
+	err := eclient.AddNewQuestion("My first question?", "user1", nil)
 	if err != nil {
-		glog.Errorf("Error in creating index: %v", err)
+		glog.Fatal(err)
 	}
-
-	testData := []BulkRequest{
-		{
-			Delete: false,
-			Index:  "personal_info",
-			ID:     "user1",
-			Body:   map[string]interface{}{"name": "pranjit", "mobile": 12345},
-		},
-		{
-			Delete: false,
-			Index:  "personal_info",
-			ID:     "user2",
-			Body:   map[string]interface{}{"name": "shivam", "mobile": 67890},
-		},
-	}
-
-	glog.Infof("Pushing Bulk...")
-	err = eclient.Bulk(ctx, testData)
+	err = eclient.AddNewQuestion("My Second question?", "user2", nil)
 	if err != nil {
-		glog.Errorf("Error in sending bulk data: %v", err)
+		glog.Fatal(err)
 	}
 
-	glog.Infof("Searching data.....")
-	body = map[string]interface{}{
-		"query": map[string]interface{}{"match_all": matchAll{}},
-	}
-	res, err := eclient.Search(ctx, []string{"personal_info"}, body, 400)
-	//resp := make(map[string]interface{})
-	var resp interface{}
-	err = json.Unmarshal(res, &resp)
+	qid := "ques_1588931754908248389_81"
+	err = eclient.AnswerQuestion(qid, "Answer to the 1st qusn", "user3")
 	if err != nil {
-		glog.Errorf("Error in searching data: %v", err)
+		glog.Fatal(err)
 	}
-	glog.Infof("Response is: %v", resp)
+	err = eclient.AddNewQuestion("My Third question?", "user2", []string{"cvp"})
+	if err != nil {
+		glog.Fatal(err)
+	}
+
+	ansid := "ans_1588932248282659190_81"
+	err = eclient.AddComment(ansid, "a good comment", "user1")
+	if err != nil {
+		glog.Fatal(err)
+	}
 }

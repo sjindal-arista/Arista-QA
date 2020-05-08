@@ -17,6 +17,7 @@ const (
 	contentTypeJSON   = "application/json"
 	contentTypeNDJSON = "application/x-ndjson"
 	docType           = "_doc"
+	update            = "_update"
 )
 
 // Client is an elasticsearch Client.
@@ -115,6 +116,23 @@ func (c *Client) DeleteDoc(ctx context.Context, index string, id string,
 		return err
 	}
 	return nil
+}
+
+// UpdateDoc updates a document with id from the specific index
+func (c *Client) UpdateDoc(ctx context.Context, index string, id string,
+	body map[string]interface{}) ([]byte, error) {
+	bodyJSON, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost,
+		c.host+"/"+index+"/"+update+"/"+id, bytes.NewReader(bodyJSON))
+	if err != nil {
+		return nil, err
+	}
+	defer req.Body.Close()
+	req.Header.Set("Content-Type", contentTypeJSON)
+	return c.do(req, 400)
 }
 
 // BulkRequest is a request for either index or delete operation, that can be bulked with others.
